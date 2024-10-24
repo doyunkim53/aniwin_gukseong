@@ -1,0 +1,44 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f4f4f4;
+}
+
+header {
+  text-align: center;
+  background-color: #0044cc;
+  color: white;
+  padding: 20px;
+}
+
+section {
+  margin: 20px 0;
+}
+
+h2 {
+  background-color: #eaeaea;
+  padding: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+canvas {
+  width: 100%;
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+footer img {
+  display: block;
+  margin: 0 auto;
+  width: 200px;
+}
