@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>애니윈 만화 적성 검사 결과</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <h1>상담을 위한 인적사항</h1>
+    <table>
+        <tr>
+            <th>이름</th>
+            <td id="name"></td>
+        </tr>
+        <tr>
+            <th>나이</th>
+            <td id="age"></td>
+        </tr>
+        <tr>
+            <th>학교/학년</th>
+            <td id="school"></td>
+        </tr>
+        <tr>
+            <th>희망 전공</th>
+            <td id="major"></td>
+        </tr>
+    </table>
+
+    <h2>검사 결과</h2>
+
+    <!-- 각 항목 결과 요약 -->
+    <div id="results">
+        <h3>1. 창의력 (Creative Thinking)</h3>
+        <p id="result-q1"></p>
+
+        <h3>2. 색채 감각 (Color Perception)</h3>
+        <p id="result-q2"></p>
+
+        <h3>3. 공간 인식 능력 (Spatial Awareness)</h3>
+        <p id="result-q3"></p>
+
+        <h3>4. 디테일 묘사 능력 (Attention to Detail)</h3>
+        <p id="result-q4"></p>
+
+        <h3>5. 캐릭터 시각적 표현 능력 (Character Visual Expression)</h3>
+        <p id="result-q5"></p>
+
+        <h3>6. 이야기 흐름 구성 능력 (Story Flow Composition)</h3>
+        <p id="result-q6"></p>
+    </div>
+
+    <canvas id="resultChart" width="400" height="200"></canvas>
+
+    <script>
+        // URL 파라미터 읽기
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = urlParams.get('name');
+        const age = urlParams.get('age');
+        const school = urlParams.get('school');
+        const major = urlParams.get('major');
+        const q1 = urlParams.get('q1');
+        const q2 = urlParams.get('q2');
+        const q3 = urlParams.get('q3');
+        const q4 = urlParams.get('q4');
+        const q5 = urlParams.get('q5');
+        const q6 = urlParams.get('q6');
+
+        // 인적사항 설정
+        document.getElementById('name').textContent = name;
+        document.getElementById('age').textContent = age;
+        document.getElementById('school').textContent = school;
+        document.getElementById('major').textContent = major;
+
+        // 각 질문별 결과 텍스트
+        const results = {
+            q1: {
+                A: '당신은 매우 창의적입니다. 항상 다양한 아이디어가 떠오르며, 이를 통해 독창적인 캐릭터와 이야기를 창조할 수 있습니다.',
+                B: '종종 창의적인 아이디어가 떠오릅니다. 애니메이션이나 만화 제작에 유용한 창의성을 지니고 있습니다.',
+                C: '가끔 창의적인 아이디어가 떠오르지만, 더욱 연습이 필요할 수 있습니다.',
+                D: '아이디어를 떠올리는 데 어려움을 겪고 있습니다. 창의성을 자극하는 활동이 필요합니다.'
+            },
+            q2: {
+                A: '탁월한 색채 감각을 지니고 있으며, 정확한 색상 선택을 통해 감정을 전달할 수 있습니다.',
+                B: '대부분 색채 감각이 뛰어나며, 색상 선택에 강점을 보입니다.',
+                C: '종종 색상 선택에 고민이 있을 수 있으나 연습을 통해 개선될 수 있습니다.',
+                D: '색상 선택에 어려움을 겪고 있으며, 색채 이론 학습이 필요합니다.'
+            },
+            q3: {
+                A: '3D 공간 인식 능력이 매우 뛰어납니다. 이를 통해 복잡한 장면을 설계하고 구현할 수 있습니다.',
+                B: '공간 인식 능력이 뛰어난 편이며, 3D 표현에 강점을 보입니다.',
+                C: '3D 공간 인식 능력을 더욱 강화할 필요가 있습니다.',
+                D: '3D 공간 인식에 어려움을 겪고 있으며, 연습이 필요합니다.'
+            },
+            q4: {
+                A: '디테일 묘사에 매우 신경 쓰며, 작품에 깊이를 더합니다.',
+                B: '종종 세부 사항에 신경을 쓰지만, 전체적으로 만족스러운 수준입니다.',
+                C: '세부 사항에 더 많은 관심이 필요합니다.',
+                D: '세부 묘사에 신경 쓰는 부분이 부족할 수 있으며, 개선이 필요합니다.'
+            },
+            q5: {
+                A: '캐릭터의 시각적 표현에서 뛰어난 능력을 보입니다.',
+                B: '캐릭터 표현에 능숙하며, 시각적 흐름을 잘 전달합니다.',
+                C: '캐릭터 표현에서 부족한 부분이 있을 수 있으며, 연습이 필요합니다.',
+                D: '캐릭터 시각적 표현에서 어려움을 겪고 있습니다.'
+            },
+            q6: {
+                A: '이야기의 흐름을 매끄럽게 구성하며, 관객의 감정을 이끌어내는 데 매우 능숙합니다.',
+                B: '이야기 구성이 대부분 매끄럽지만, 추가적인 보완이 필요할 수 있습니다.',
+                C: '이야기의 흐름 구성에서 부족한 부분이 있습니다. 개선이 필요합니다.',
+                D: '이야기 흐름을 구성하는 데 큰 어려움을 겪고 있습니다.'
+            }
+        };
+
+        // 결과 텍스트 설정
+        document.getElementById('result-q1').textContent = results.q1[q1];
+        document.getElementById('result-q2').textContent = results.q2[q2];
+        document.getElementById('result-q3').textContent = results.q3[q3];
+        document.getElementById('result-q4').textContent = results.q4[q4];
+        document.getElementById('result-q5').textContent = results.q5[q5];
+        document.getElementById('result-q6').textContent = results.q6[q6];
+
+        // Chart.js 그래프
+        const ctx = document.getElementById('resultChart').getContext('2d');
+        const resultChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['창의력', '색채 감각', '공간 인식 능력', '디테일 묘사 능력', '캐릭터 시각적 표현', '이야기 흐름 구성 능력'],
+                datasets: [{
+                    label: '점수',
+                    data: [
+                        {A: 100, B: 80, C: 60, D: 40}[q1],
+                        {A: 100, B: 80, C: 60, D: 40}[q2],
+                        {A: 100, B: 80, C: 60, D: 40}[q3],
+                        {A: 100, B: 80, C: 60, D: 40}[q4],
+                        {A: 100, B: 80, C: 60, D: 40}[q5],
+                        {A: 100, B: 80, C: 60, D: 40}[q6]
+                    ],
+                    backgroundColor: ['rgba(255, 99, 132, 0.2)', 'rgba(54, 162, 235, 0.2)', 'rgba(255, 206, 86, 0.2)', 'rgba(75, 192, 192, 0.2)', 'rgba(153, 102, 255, 0.2)', 'rgba(255, 159, 64, 0.2)'],
+                    borderColor: ['rgba(255, 99, 132, 1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    </script>
+</script>
+
+<script>
+    const ctx = document.getElementById('myRadarChart').getContext('2d');
+    const myRadarChart = new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['창의력', '색채 감각', '공간 인식', '디테일 묘사', '구성 능력', '스토리텔링'],
+            datasets: [{
+                label: '적성 검사 결과',
+                data: [20, 40, 50, 60, 80, 100], // 각 항목별 점수
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scale: {
+                ticks: {
+                    beginAtZero: true,
+                    max: 100 // 최대 점수를 100점으로 설정
+                }
+            }
+        }
+    });
+</script>
+
+<img src="aniwin-logo.png" alt="애니윈 로고" width="200px">
