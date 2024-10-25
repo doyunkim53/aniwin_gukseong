@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>애니윈 만화 적성 검사 결과</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 인적사항 테이블에 연파랑 배경색 적용 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background-color: #d4f1f9;
+        }
+
+        td {
+            background-color: #f9f9f9;
+        }
+
+        /* 결과 설명 및 검사 결과의 박스 색깔 연파랑 */
+        .result-box {
+            background-color: #d4f1f9;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>상담을 위한 인적사항</h1>
+    <table>
+        <tr>
+            <th>이름</th>
+            <td id="name"></td>
+        </tr>
+        <tr>
+            <th>나이</th>
+            <td id="age"></td>
+        </tr>
+        <tr>
+            <th>학교/학년</th>
+            <td id="school"></td>
+        </tr>
+        <tr>
+            <th>희망 전공</th>
+            <td id="major"></td>
+        </tr>
+    </table>
+
+    <h2>검사 결과</h2>
+    <div class="result-box">
+        <canvas id="radarChart" width="400" height="400"></canvas>
+    </div>
+
+    <h2>결과 설명</h2>
+    <div class="result-box">
+        <h3>1. 창의력 (Creative Thinking)</h3>
+        <p id="desc-q1"></p>
+
+        <h3>2. 색채 감각 (Color Perception)</h3>
+        <p id="desc-q2"></p>
+
+        <h3>3. 공간 인식 능력 (Spatial Awareness)</h3>
+        <p id="desc-q3"></p>
+
+        <h3>4. 디테일 묘사 능력 (Attention to Detail)</h3>
+        <p id="desc-q4"></p>
+
+        <h3>5. 아이디어 시각화 및 흐름 구성 능력 (Visual Idea Flow)</h3>
+        <p id="desc-q5"></p>
+
+        <h3>6. 스토리텔링 능력 (Storytelling Skills)</h3>
+        <p id="desc-q6"></p>
+    </div>
+
+    <script>
+        // URL에서 매개변수 추출
+        const urlParams = new URLSearchParams(window.location.search);
+        const name = urlParams.get('name'); // 입력한 이름 사용
+        const age = urlParams.get('age');
+        const school = urlParams.get('school');
+        const major = urlParams.get('major');
+        const q1 = urlParams.get('q1');
+        const q2 = urlParams.get('q2');
+        const q3 = urlParams.get('q3');
+        const q4 = urlParams.get('q4');
+        const q5 = urlParams.get('q5');
+        const q6 = urlParams.get('q6');
+
+        // 인적사항 출력
+        document.getElementById('name').textContent = name;
+        document.getElementById('age').textContent = age;
+        document.getElementById('school').textContent = school;
+        document.getElementById('major').textContent = major;
+
+        // 결과 설명 생성 (이름을 활용한 설명)
+        const descriptions = {
+            A: `${name}는 해당 영역에서 뛰어난 능력을 보입니다. 이를 활용하여 더 깊이 있는 창의적 작업이 가능합니다.`,
+            B: `${name}는 해당 영역에서 충분한 능력을 가지고 있습니다. 더 발전시킬 여지가 있습니다.`,
+            C: `${name}는 해당 영역에서 중간 수준의 능력을 보입니다. 연습을 통해 더 성장할 수 있습니다.`,
+            D: `${name}는 해당 영역에서 개선이 필요합니다. 더 많은 경험과 노력이 필요합니다.`
+        };
+
+        document.getElementById('desc-q1').textContent = descriptions[q1];
+        document.getElementById('desc-q2').textContent = descriptions[q2];
+        document.getElementById('desc-q3').textContent = descriptions[q3];
+        document.getElementById('desc-q4').textContent = descriptions[q4];
+        document.getElementById('desc-q5').textContent = descriptions[q5];
+        document.getElementById('desc-q6').textContent = descriptions[q6];
+
+        // Radar 차트 데이터 설정
+        const data = {
+            labels: ['창의력', '색채 감각', '공간 인식', '디테일 묘사', '아이디어 시각화', '스토리텔링'],
+            datasets: [{
+                label: '적성 검사 결과',
+                data: [
+                    q1 === 'A' ? 100 : q1 === 'B' ? 80 : q1 === 'C' ? 60 : 40,
+                    q2 === 'A' ? 100 : q2 === 'B' ? 80 : q2 === 'C' ? 60 : 40,
+                    q3 === 'A' ? 100 : q3 === 'B' ? 80 : q3 === 'C' ? 60 : 40,
+                    q4 === 'A' ? 100 : q4 === 'B' ? 80 : q4 === 'C' ? 60 : 40,
+                    q5 === 'A' ? 100 : q5 === 'B' ? 80 : q5 === 'C' ? 60 : 40,
+                    q6 === 'A' ? 100 : q6 === 'B' ? 80 : q6 === 'C' ? 60 : 40,
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+
+        // Radar 차트 옵션 설정
+        const config = {
+            type: 'radar',
+            data: data,
+            options: {
+                scale: {
+                    ticks: {
+                        beginAtZero: true,
+                        max: 100,  // 최대 점수를 100점으로 설정
+                        stepSize: 20 // 20 단위로 나눔
+                    }
+                }
+            }
+        };
+
+        // 차트 그리기
+        const ctx = document.getElementById('radarChart').getContext('2d');
+        new Chart(ctx, config);
+    </script>
+
+</body>
+</html>
